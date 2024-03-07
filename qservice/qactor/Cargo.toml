@@ -15,7 +15,7 @@ axum = "0.7.4"
 
 tonic = { version = "0.8" }
 tokio = { version = "1.25", features = ["full"] }
-futures = "0.3"
+#futures = "0.3"
 tokio-stream = { version = "0.1", features = ["net"] }
 tokio-current-thread = "0.1.7"
 
@@ -32,7 +32,7 @@ pyo3 = { version = "0.20", features = ["extension-module"] }
 pyo3-asyncio = { version = "0.20", features = ["tokio-runtime"] }
 
 async-std = "1.9"
-
+cuda-sys = "0.2.0"
 [dependencies.lazy_static]
 version = "1.0"
 features = ["spin_no_std"]

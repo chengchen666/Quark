@@ -92,8 +92,8 @@ impl ActorSystem {
         return Ok(())
     }
 
-    pub fn NewPyActor(&self, id: &str, modName: &str, className: &str, queue: &PyAny) -> Result<()> {
-        let actor = PyActor::New(id, modName, className, queue);
+    pub fn NewPyActor(&self, id: &str, modName: &str, className: &str, queue: &PyAny, dev_id: i16) -> Result<()> {
+        let actor = PyActor::New(id, modName, className, queue, dev_id);
         self.NewActor(id, Actor::PyActor(actor))
     }
 
@@ -128,6 +128,16 @@ impl ActorSystem {
     }
 
     // pub fn StartLocalActors(&self, actors: Vec<Actor)
+    pub fn GetActorDev(&self, id: &str) -> Result<i16> {
+        let actor = match self.actors.lock().unwrap().get(id) {
+            None => {
+                return Err(Error::NotExist(format!("ActorSystem::GetActorDev ")))
+            }
+            Some(a) => {
+                return Ok(a.GetActorDev())
+            }
+        };
+    }
 }
 
 pub struct Pod {

@@ -138,6 +138,7 @@ fn qactor(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(new_http_actor, m)?)?;
     m.add_function(wrap_pyfunction!(new_py_actor, m)?)?;
     m.add_function(wrap_pyfunction!(tryput, m)?)?;
+    m.add_function(wrap_pyfunction!(get_actor_dev, m)?)?;
     m.add_class::<RustStruct>()?;
     Ok(())
 }
@@ -176,6 +177,16 @@ fn sendto(_py: Python, actorId: String, func: String, reqId: u64, data: Vec<u8>)
 }
 
 #[pyfunction]
+fn get_actor_dev(_py: Python, actorNname: &str) -> PyResult<i16> {
+
+    match ACTOR_SYSTEM.GetActorDev(actorNname) {
+        Err(e) => return Err(e.into()),
+        Ok(r) => return Ok(r)
+    }
+}
+
+
+#[pyfunction]
 fn new_http_actor(
     _py: Python, 
     proxyActorId: &str, 
@@ -195,9 +206,10 @@ fn new_py_actor(
     id: &str, 
     modName: &str, 
     className: &str,
-    queue: &PyAny
+    queue: &PyAny,
+    dev_id: i16
 ) -> PyResult<()> {
-    match ACTOR_SYSTEM.NewPyActor(id, modName, className, queue) {
+    match ACTOR_SYSTEM.NewPyActor(id, modName, className, queue, dev_id) {
         Err(e) => return Err(e.into()),
         Ok(()) => return Ok(())
     }

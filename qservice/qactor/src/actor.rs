@@ -21,6 +21,8 @@ use qshare::qactor;
 
 use crate::http_actor::HttpActor;
 
+use cuda_sys::cudart::*;
+
 #[derive(Debug, Clone)]
 pub enum Actor { 
     PyActor(PyActor),
@@ -32,6 +34,17 @@ impl Actor {
         match self {
             Actor::PyActor(a) => a.Tell(req),
             Actor::HttpActor(a) => a.Tell(req),
+        }
+    }
+    pub fn GetActorDev(&self) -> i16{
+        match self {
+            Actor::PyActor(a) => {
+                return a.location.gpuOrdinal.clone();
+            }
+            Actor::HttpActor(a) => {
+                println!("Http Actor does not bind GPU device");
+                panic!();
+            },
         }
     }
 }
@@ -59,15 +72,21 @@ impl Deref for PyActor {
 }
 
 impl PyActor {
-    pub fn New(id: &str, modName: &str, className: &str, queue: &PyAny) -> Self {
+    pub fn New(id: &str, modName: &str, className: &str, queue: &PyAny, devId: i16) -> Self {
         let inner = PyActorInner {
             id: id.to_owned(),
             modName: modName.to_owned(),
             className: className.to_owned(),
-            location: LocationId::default(),
-            queue: queue.into()
+            location: LocationId {
+                gpuOrdinal: devId,
+                ..Default::default()
+            },
+            queue: queue.into(),
+            
         };
-
+        if devId >= 0 {
+            unsafe { cudaSetDevice(devId.into());}
+        }
         return Self(Arc::new(inner))
     }
     
@@ -90,4 +109,5 @@ pub struct LocationId {
     pub podIp: String,
     pub processId: u16,
     pub threadId: u16,
+    pub gpuOrdinal: i16, // -1 means on cpu
 }
